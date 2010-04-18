@@ -1,0 +1,517 @@
+%
+%  Copyright (C) 1998-2006 Etymon Systems, Inc. <http://www.etymon.com/>
+%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\pdfpagewidth 8.5in
+\pdfpageheight 11in
+
+\pdfcompresslevel 9
+
+\pdfinfo {
+/Title (PJX User's Guide)
+/Author (Nassib Nassar)
+/Subject (PJX)
+/Keywords (PJX PJ PDF Portable Document Format information manual guide)
+}
+
+\pdfcatalog {
+/URI (http://www.etymon.com/pjx/)
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\input texinfo
+@c %**start of header
+@setfilename pjx.info
+@settitle PJX User's Guide
+@setchapternewpage odd
+@c   @paragraphindent 0
+@c %**end of header
+
+@syncodeindex pg cp
+
+@dircategory Etymon
+@direntry
+* PJX: (pjx).                       PJX User's Guide.
+@end direntry
+
+@finalout
+
+@include version.texi
+
+@macro pjxcopyright{year}
+@emph{Copyright} @copyright{} @emph{1998--2006 by Etymon Systems, Inc.}
+@end macro
+
+@macro spsection{}
+@sp 3
+@end macro
+
+@macro permission{}
+
+@ 
+
+@sp 4
+
+This document describes PJX Version @value{VERSION}.  Updates and
+information are available from the Etymon web site at
+@url{http://www.etymon.com/}.
+
+@vskip 0pt plus 1filll
+
+@pjxcopyright{}
+
+@sp 1
+
+@emph{ETYMON is a registered trademark and service mark of Etymon
+Systems, Inc.  All other trademarks are the property of their
+respective owners.}
+
+@sp 1
+
+@emph{Etymon Systems, Inc.@: disclaims all warranties, either express or
+implied, including but not limited to implied warranties of
+merchantability, fitness for a particular purpose, and noninfringement
+of third-party rights, and all other remedies for breach of the above
+warranty.  Etymon Systems, Inc.@: assumes no liability with respect to
+the accuracy, adequacy, quality, and reliability of this publication.}
+
+@sp 1
+
+@emph{The PDF data structures, operators, and specification are} @*
+@emph{Copyright} @copyright{} @emph{1985--2006 by Adobe Systems
+Incorporated.}
+
+@end macro
+
+@ifinfo
+This is a user's guide to PJX.
+
+@pjxcopyright{}
+
+@permission{}
+
+@dedication{}
+
+@end ifinfo
+
+@titlepage
+
+@title PJX
+@subtitle @strong{Java Class Library for PDF Software Development}
+@author Nassib Nassar @emph{@ Etymon Systems, Inc.}
+@page
+@permission{}
+@page
+
+@ifnothtml
+@contents
+@end ifnothtml
+
+@ifnottex
+@node Top, Tutorial, (dir), (dir)
+@top PJX User's Guide
+Version @value{VERSION}
+@sp 1
+@pjxcopyright{}
+@sp 1
+@end ifnottex
+
+
+@end titlepage
+
+
+@menu
+* Tutorial::     
+* Advanced topics::     
+* Reference::     
+* Error messages::     
+* Notes for Isearch users::     
+* Index::               
+@end menu
+
+
+@iftex
+@headings off
+@oddheading  @| @thischaptername @| @thispage
+@evenheading @thispage @| @thischaptername @|
+@end iftex
+
+
+@node Tutorial, Advanced topics, Top, Top
+@chapter Tutorial
+@cindex Tutorial
+
+@noindent
+@sc{This} document serves as an introduction to PJX, a Java class
+library for PDF software development.  It is designed as a supplement
+to the API (@code{javadoc}) reference documentation for PJX.  This
+document is intended to be used in conjunction with, and assumes some
+familiarity with, the PDF specification published by Adobe Systems
+Incorporated (@emph{PDF Reference}, 3rd ed., ISBN 0-201-75839-3).  It
+also assumes familiarity with the Java programming language.
+@strong{This is a preliminary document and a work in progress.}
+
+The purpose of PJX is to enable you to be a PDF programmer.  It does
+not hide the details of PDF unless you want it to; but it tries to
+make them much easier and more pleasant to work with.  It provides a
+set of fundamental tools that can be used to develop almost any PDF
+application.  On top of these tools are layered classes that
+encapsulate common PDF functions.  This provides access to PDF
+documents at multiple levels, from basic encoding/decoding up to the
+application layer.  You can use PJX as a foundation for building PDF
+capabilities into existing Java software or for creating new PDF
+applications.
+
+
+@menu
+* Introduction::          
+* Reading a document::          
+* Modifying a document::                
+* Writing a document::                
+* Appending documents::                
+* Multiple documents in a file::                
+* Fields::                
+* Fields and XML::                
+* Relevance ranking::                
+* Multiple databases::                
+* Listing database information::                
+* Database status::                
+@end menu
+
+
+@spsection{}
+@node Introduction, Indexing, Tutorial, Tutorial
+@section Introduction
+
+This chapter gives an overview of how the PJX classes fit together in
+order to perform simple operations on PDF documents.
+
+The core of PJX is the @code{PdfManager} class in
+@code{com.etymon.pjx} which coordinates a set of modifications to a
+PDF document.  @code{PdfManager} operates on PDF documents via two
+other classes, @code{PdfReader} and @code{PdfWriter}.  Additional
+utility classes in @code{com.etymon.pjx.util} operate on PDF documents
+via @code{PdfManager}; they serve to consolidate common PDF functions
+and access to related sets of PDF objects.
+
+
+@spsection{}
+@node Reading a document, Searching, Introduction, Tutorial
+@section Reading a document
+@cindex Reading a document
+
+The @code{PdfReader} class provides low-level access to an existing
+PDF document.  Its constructor accepts a class that implements the
+@code{PdfInput} interface.  Two such classes are provided,
+@code{PdfInputBuffer} and @code{PdfInputFile}.  Using
+@code{PdfInputBuffer} causes the PDF document to reside in a buffer in
+memory for the sake of efficiency; the document can originate in the
+file system or it can be already in memory.  @code{PdfInputFile}
+accesses a PDF document in the file system and only reads portions of
+it into memory if they are needed.
+
+Following are some examples of constructing a @code{PdfReader} instance:
+
+@example
+PdfReader r = new PdfReader(new PdfInputBuffer(new File("test.pdf")));
+@end example
+
+@example
+ByteBuffer bb = @dots{} ;
+PdfReader r = new PdfReader(new PdfInputBuffer(bb, "Test document"));
+@end example
+
+@example
+PdfReader r = new PdfReader(new PdfInputFile(new File("test.pdf")));
+@end example
+
+Once the @code{PdfReader} instance has been constructed, we can
+associate a @code{PdfManager} instance with it:
+
+@example
+PdfManager m = new PdfManager(r);
+@end example
+
+@noindent
+@code{PdfManager} keeps track of changes made to the document and
+allows the resultant document to be written to a @code{PdfWriter}.
+
+It is not necessary to retain a reference to the @code{PdfReader}
+instance, although it is sometimes useful to do so.  For example, if
+an existing document needs to be reused, such as in order to be
+modified in different ways by multiple instances of @code{PdfManager},
+only one instance of @code{PdfReader} should be created for that
+document.
+
+
+@spsection{}
+@node Modifying a document, Right truncation, Reading a document, Tutorial
+@section Modifying a document
+@cindex Modifying a document
+
+@code{PdfManager} provides fundamental methods for accessing and
+modifying the set of PDF objects in a document.  One possible starting
+point for examining a PDF document is to use @code{PdfManager} to
+access the document's trailer dictionary.  The trailer dictionary
+contains pointers to useful objects in the document.  We can get the
+trailer dictionary as follows:
+
+@example
+PdfDictionary td = m.getTrailerDictionary();
+@end example
+
+@noindent
+PJX represents a PDF dictionary using a Java @code{Map} instance,
+which can be retrieved via the @code{PdfDictionary} method,
+@code{getMap()}:
+
+@example
+Map tdMap = td.getMap();
+@end example
+
+@noindent
+The PDF specification tells us that the trailer dictionary contains
+several keys including @code{Info}, which is mapped to an indirect
+reference to the document information dictionary.  We can retrieve the
+reference from @code{tdMap}:
+
+@example
+PdfReference infoRef = (PdfReference)tdMap.get(new PdfName("Info"));
+@end example
+
+@noindent
+@code{PdfManager} provides a method to resolve an indirect reference,
+@code{getObjectIndirect(PdfObject)}:
+
+@example
+PdfDictionary info = (PdfDictionary)m.getObjectIndirect(infoRef);
+@end example
+
+@noindent
+In general it is a good idea to call
+@code{getObjectIndirect(PdfObject)} on any retrieved PDF object, since
+virtually any PDF object can be referenced indirectly, and this method
+does not mind being called with direct objects, which it simply returns
+unchanged.
+
+An alternative way to resolve an indirect reference is using the
+@code{PdfManager.getObject(int)} method:
+
+@example
+PdfDictionary info = (PdfDictionary)m.getObject(infoRef.getObjectNumber());
+@end example
+
+@noindent
+However, @code{getObjectIndirect(PdfObject)} is normally more
+effective because it follows multiple levels of indirection and can be
+called with a generic @code{PdfObject} instance.
+
+We now have the document information dictionary which includes
+document metadata.  (Note: PDF starting with version 1.4 has two
+different ways of storing document metadata, and only one is
+demonstrated in this example.)  We could examine the dictionary's
+elements by accessing @code{info.getMap()}.  However, we would like to
+go a step further and modify one of the elements, in this case, the
+@code{Title} element.  This requires making a copy of the dictionary
+before modifying the element, because @code{PdfDictionary.getMap()}
+returns an unmodifiable @code{Map} instance:
+
+@example
+Map newInfo = new HashMap(info.getMap());
+newInfo.put(new PdfName("Title"), new PdfString("The New Title"));
+@end example
+
+@noindent
+The old @code{Info} dictionary can now be replaced with the new one,
+using the @code{PdfManager.setObject(PdfObject, int)} method:
+
+@example
+m.setObject(new PdfDictionary(newInfo), infoRef.getObjectNumber());
+@end example
+
+@noindent
+@code{PdfManager} does not need to know the object's generation number
+because it will automatically replace the latest generation of the
+object.  As a result of this last example, the @code{PdfManager}
+instance now represents a document that reflects the modified
+@code{Info} dictionary.
+
+
+@spsection{}
+@node Writing a document, Phrases, Modifying a document, Tutorial
+@section Writing a document
+@cindex Writing a document
+
+The document being modified, we now want to write the resultant
+document to a file.  @code{PdfWriter}, like @code{PdfReader}, will
+interface to either memory or the file system.  It is constructed with
+a @code{File} or @code{OutputStream} instance, such as in the
+following examples:
+
+@example
+PdfWriter w = new PdfWriter(new File("out.pdf"));
+@end example
+
+@example
+OutputStream os = @dots{} ;
+PdfWriter w = new PdfWriter(os);
+@end example
+
+@noindent
+Once we have a new @code{PdfWriter} instance, we can write the
+modified document using the @code{PdfManager.writeDocument(PdfWriter)}
+method:
+
+@example
+m.writeDocument(w);
+@end example
+
+@noindent
+Finally, the @code{PdfWriter.close()} method should be called:
+
+@example
+w.close();
+@end example
+
+This is all that is needed to read a PDF document, make a simple
+modification to it, and write the result to a file.
+
+
+@spsection{}
+@node Appending documents, Fields, Writing a document, Tutorial
+@section Appending documents
+@cindex Appending documents
+
+It is often useful to combine multiple PDF documents during the course
+of working with them.  The utility class, @code{PdfAppender}, performs
+this function on a list of @code{PdfManager} instances:
+
+@example
+List m = new ArrayList();
+m.add( new PdfManager(new PdfReader(new PdfInputFile(new File("test1.pdf")))) );
+m.add( new PdfManager(new PdfReader(new PdfInputFile(new File("test2.pdf")))) );
+m.add( new PdfManager(new PdfReader(new PdfInputFile(new File("test3.pdf")))) );
+PdfWriter w = new PdfWriter(new File("out.pdf"));
+PdfAppender a = new PdfAppender(m, w);
+a.append();
+w.close();
+@end example
+
+The @code{PdfManager} instances can be modified normally before
+appending, but sometimes it is desirable to modify the resultant
+document @emph{after} appending without having to go through the file
+system.  This can be done by making @code{PdfAppender} write to a
+buffer and then constructing a new instance of @code{PdfManager} based
+on that buffer:
+
+@example
+List m = @dots{} ;
+@dots{}
+ByteArrayOutputStream os = new ByteArrayOutputStream();
+PdfWriter w = new PdfWriter(os);
+PdfAppender a = new PdfAppender(m, w);
+a.append();
+w.close();
+os.close();
+ByteBuffer bb = ByteBuffer.wrap(os.toByteArray());
+PdfReader r = new PdfReader(new PdfInputBuffer(bb, "Appended Document"));
+PdfManager big = new PdfManager(r);
+@end example
+
+Note that once the appending process has completed and the
+@code{PdfWriter} and @code{ByteArrayOutputStream} instances have been
+closed, the objects referenced by @code{m}, @code{a}, and @code{w} can
+be discarded, because the resultant document is now completely
+contained in the stream referenced by @code{os}.  However, they do not
+have to be discarded, and the original @code{PdfManager} instances
+could be kept active to be reused or further modified.  The
+@code{PdfAppender} and @code{PdfWriter} instances cannot be reused and
+therefore should be discarded.
+
+
+@spsection{}
+@node Examining objects recursively, null, Appending documents, Tutorial
+@section Examining objects recursively
+@cindex Examining objects recursively
+
+PDF objects can be nested arbitrarily within @code{PdfArray} and
+@code{PdfDictionary} instances, and it is sometimes necessary to
+examine their contents recursively.  One example of this would be to
+update all @code{PdfReference} instances that reference a specific
+object so that they will instead reference some other (probably new)
+object.
+
+The @code{PdfObject.filter(PdfObjectFilter)} method is provided for
+this purpose and is available for all subclasses of @code{PdfObject}.
+This method accepts a class that implements the @code{PdfObjectFilter}
+interface.  It makes multiple calls to the @code{PdfObjectFilter}
+methods, @code{preFilter(PdfObject)} and @code{postFilter(PdfObject)},
+passing to them each object as a parameter, one at a time.  The
+@code{preFilter()} and @code{postFilter()} methods can examine the
+object and optionally modify it by returning a replacement object (or
+@code{null} to discard it).  They are called in the following order
+for each object:
+
+@enumerate
+@item
+The @code{preFilter()} method is called with the object as a
+parameter.
+
+@item
+If the object is a container (i.e. @code{PdfArray} or
+@code{PdfDictionary}), the elements it contains are examined
+recursively following steps 1 to 3.  Note that at this point, the
+object is whatever was returned by @code{preFilter()} in step 1.
+
+@item
+The @code{postFilter()} method is called with the object as a
+parameter.
+@end enumerate
+
+We can therefore easily implement the example above to update all
+instances of a specific indirect reference:
+
+@verbatim
+public class ModifyReferences implements PdfObjectFilter {
+
+       	public ModifyReferences() {
+	}
+
+       	public PdfObject modify(PdfObject obj, PdfReference find, PdfReference replace)
+                                                            throws PdfFormatException {
+                _find = find;
+                _replace = replace;
+                return obj.filter(this);
+	}
+
+	public PdfObject preFilter(PdfObject obj) throws PdfFormatException {
+                if (obj.equals(_find)) {
+                        return _replace;
+		} else {
+			return obj;
+		}
+	}
+
+	public PdfObject postFilter(PdfObject obj) throws PdfFormatException {
+                return obj;
+	}
+
+        PdfReference _find;
+        PdfReference _replace;
+
+}
+
+@end verbatim
+
+The @code{PdfRenumberOffset} utility class uses this approach to
+implement a function for renumbering indirect references.
+
+
+@bye
+
+@c Local Variables: ***
+@c mode: TeXinfo ***
+@c End: ***
